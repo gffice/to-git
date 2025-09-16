@@ -609,7 +609,7 @@ relay_send_command_from_edge_,(streamid_t stream_id, circuit_t *orig_circ,
   size_t msg_body_len;
   {
     relay_cell_fmt_t cell_format = circuit_get_relay_format(circ, cpath_layer);
-    relay_msg_t msg;
+    relay_msg_t msg = {0};
     if (payload_len >
         relay_cell_max_payload_size(cell_format, relay_command)) {
       // TODO CGO: Rate-limit this?
@@ -626,6 +626,9 @@ relay_send_command_from_edge_,(streamid_t stream_id, circuit_t *orig_circ,
     msg.length = payload_len;
     msg.body = (const uint8_t *) payload;
     msg_body_len = msg.length;
+    // If this cell should be RELAY_EARLY, we'll change the type
+    // later in this function.
+    msg.is_relay_early = false;
 
     if (relay_msg_encode_cell(cell_format, &msg, &cell) < 0) {
       // We already called IF_BUG_ONCE in relay_msg_encode_cell.
