@@ -42,6 +42,7 @@ variables:
 .x86-64-template: &x86-64-template
   tags:
     - amd64
+    - tpa
 
 # This template should be usable on any system that's based on apt.
 .apt-template: &apt-template |
@@ -117,7 +118,6 @@ variables:
         git -C ./chutney checkout "$CHUTNEY_COMMIT"
 
         apt install python3-venv
-
         export CHUTNEY_PATH="$(pwd)/chutney"
         python3 -m venv venv
         venv/bin/pip install ./chutney
@@ -137,6 +137,10 @@ debian-minimal:
 debian-i386-minimal:
   # TODO: Use a TPA-maintained image when there is one.
   # See https://gitlab.torproject.org/tpo/tpa/base-images/-/issues/3
+  #
+  # XXX: Seems that anything else than Bullseye is making
+  # "src/test/test_include.sh" test to fail. For now, keep bullseye until we
+  # figure this out.
   image:
     name: i386/debian:bullseye
     docker:
@@ -148,8 +152,6 @@ debian-i386-minimal:
 #####
 # Run "make check" with a hardened clang on debian stable.  This takes
 # care of a hardening check, and a compile-with-clang check.
-#
-# TODO: This will be faster once we merge #40098 and #40099.
 debian-hardened:
   image: containers.torproject.org/tpo/tpa/base-images/debian:bookworm
   <<: *debian-template
