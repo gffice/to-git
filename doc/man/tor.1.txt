@@ -4026,6 +4026,11 @@ __DataDirectory__/**`control_auth_cookie`**::
     the `CookieAuthFile` configuration option. Regenerated on startup. See
     control-spec.txt in https://spec.torproject.org/[torspec] for details.
 
+__DataDirectory__/**`pt_state`**::
+    Directory used by Tor's pluggable transport tools (client and server)
+    to store persistent state across restarts. Its contents are managed by
+    the transport implementations and should be considered opaque.
+
 __DataDirectory__/**`lock`**::
     This file is used to prevent two Tor instances from using the same data
     directory. If access to this file is locked, data directory is already in
