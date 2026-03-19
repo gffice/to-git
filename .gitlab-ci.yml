@@ -21,10 +21,15 @@
 # Copyright 2020, The Tor Project, Inc.
 # See LICENSE for licence information.
 
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
 # These variables are set everywhere, unconditionally.
 variables:
   TERM: "ansi"
   DEBUG_CI: "yes"
+  GITLAB_ADVANCED_SAST_ENABLED: "true"
+  SAST_EXCLUDED_PATHS: "spec,test,tests,tmp"
 
 # This template is for exporting ephemeral things from the scripts.  By
 # convention we expect our scripts to copy stuff into artifacts/, rather than
