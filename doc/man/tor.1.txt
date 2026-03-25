@@ -2445,6 +2445,13 @@ is non-zero):
     setting for DataDirectoryGroupReadable when the KeyDirectory is the
     same as the DataDirectory, and 0 otherwise. (Default: auto)
 
+[[ManualOnionKeyRotation]] **ManualOnionKeyRotation** **0**|**1**:
+    Force Tor to not rotate or expire its Curve25519
+    Onion Keys. This feature should only be used by people
+    experimenting with stateless relays or bridge
+    infrastructure where multiple Tor instances share the
+    same keys (Default: 0)
+
 [[MainloopStats]] **MainloopStats** **0**|**1**::
     Log main loop statistics every **HeartbeatPeriod** seconds. This is a log
     level __notice__ message designed to help developers instrumenting Tor's

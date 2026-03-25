@@ -646,6 +646,7 @@ static const config_var_t option_vars_[] = {
   V(RelayBandwidthBurst,         MEMUNIT,  "0"),
   V(RelayBandwidthRate,          MEMUNIT,  "0"),
   V(RephistTrackTime,            INTERVAL, "24 hours"),
+  V(ManualOnionKeyRotation,      BOOL,     "0"),
   V_IMMUTABLE(RunAsDaemon,       BOOL,     "0"),
   V(ReducedExitPolicy,           BOOL,     "0"),
   V(ReevaluateExitPolicy,        BOOL,     "0"),
