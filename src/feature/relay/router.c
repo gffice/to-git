@@ -581,6 +581,85 @@ rotate_onion_key(void)
   return result;
 }
 
+/** Check if our Curve25519 onion keys were manually rotated and start using
+ * the new keys. */
+void
+router_reload_manual_onion_keys(void)
+{
+  if (! get_options()->ManualOnionKeyRotation)
+    return;
+
+  char *fname = NULL;
+  char *fname_old = NULL;
+
+  curve25519_keypair_t onion_ntor_key;
+  curve25519_keypair_t onion_ntor_old_key;
+
+  bool onion_ntor_key_rotated = false;
+  bool onion_ntor_old_key_rotated = false;
+
+  int result = -1;
+
+  time_t now = time(NULL);
+  or_state_t *state = get_or_state();
+
+  fname = get_keydir_fname("secret_onion_key_ntor");
+  fname_old = get_keydir_fname("secret_onion_key_ntor.old");
+
+  result = init_curve25519_keypair_from_file(&onion_ntor_key,
+                                             fname, 0, LOG_ERR, "onion");
+  if (result < 0)
+    goto done;
+
+  result = init_curve25519_keypair_from_file(&onion_ntor_old_key,
+                                             fname_old, 0, LOG_ERR, "onion");
+
+  if (result < 0)
+    goto done;
+
+  onion_ntor_key_rotated = !tor_memeq(&curve25519_onion_key,
+                                      &onion_ntor_key,
+                                      sizeof(curve25519_keypair_t));
+  onion_ntor_old_key_rotated = !tor_memeq(&last_curve25519_onion_key,
+                                          &onion_ntor_old_key,
+                                          sizeof(curve25519_keypair_t));
+
+  if (onion_ntor_key_rotated || onion_ntor_old_key_rotated) {
+    log_info(LD_GENERAL,
+             "Rotating manually managed onion keys: "
+             "%s (%s), %s (%s)",
+             fname,
+             onion_ntor_key_rotated ? "rotated" : "not rotated",
+             fname_old,
+             onion_ntor_old_key_rotated ? "rotated" : "not rotated");
+
+    tor_mutex_acquire(key_lock);
+
+    if (onion_ntor_key_rotated) {
+      memcpy(&curve25519_onion_key, &onion_ntor_key,
+             sizeof(curve25519_keypair_t));
+    }
+
+    if (onion_ntor_old_key_rotated) {
+      memcpy(&last_curve25519_onion_key, &onion_ntor_old_key,
+             sizeof(curve25519_keypair_t));
+    }
+
+    state->LastRotatedOnionKey = onionkey_set_at = now;
+
+    tor_mutex_release(key_lock);
+
+    mark_my_descriptor_dirty("manually rotated onion key");
+  }
+
+ done:
+  tor_free(fname);
+  tor_free(fname_old);
+
+  memwipe(&onion_ntor_key, 0, sizeof(onion_ntor_key));
+  memwipe(&onion_ntor_old_key, 0, sizeof(onion_ntor_old_key));
+}
+
 /** Log greeting message that points to new relay lifecycle document the
  * first time this function has been called.
  */
@@ -606,7 +685,7 @@ log_new_relay_greeting(void)
  * is true, create a new keypair and write it into the file.  If there are
  * errors, log them at level <b>severity</b>. Generate files using <b>tag</b>
  * in their ASCII wrapper. */
-static int
+STATIC int
 init_curve25519_keypair_from_file(curve25519_keypair_t *keys_out,
                                   const char *fname,
                                   int generate,

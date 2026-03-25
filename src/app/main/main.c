@@ -165,6 +165,10 @@ do_hup(void)
     }
   }
 
+  /* Check if onion keys were manually rotated? */
+  if (options->ManualOnionKeyRotation)
+    router_reload_manual_onion_keys();
+
   /* Rotate away from the old dirty circuits. This has to be done
    * after we've read the new options, but before we start using
    * circuits for directory fetches. */
