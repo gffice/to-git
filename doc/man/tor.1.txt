@@ -178,6 +178,12 @@ The following options in this section are only recognized on the
     See https://community.torproject.org/relay/setup/post-install/family-ids/
     for more information.
 
+[[opt-keygen-onion]] **`--keygen-onion`** __filename__::
+    Generate a new Curve25519 Onion key in __filename__. This command can be
+    used together with ManualOnionKeyRotation for relay operators interested in
+    manually rotating their Onion keys. This command overwrites these files if they
+    already exist.
+
 **`--passphrase-fd`** __FILEDES__::
     File descriptor to read the passphrase from.  Note that unlike with the
     tor-gencert program, the entire file contents are read and used as
