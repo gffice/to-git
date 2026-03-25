@@ -178,6 +178,12 @@ The following options in this section are only recognized on the
     See https://community.torproject.org/relay/setup/post-install/family-ids/
     for more information.
 
+[[opt-keygen-onion]] **`--keygen-onion`** __filename__::
+    Generate a new Curve25519 Onion key in __filename__. This command can be
+    used together with ManualOnionKeyRotation for relay operators interested in
+    manually rotating their Onion keys. This command overwrites these files if they
+    already exist.
+
 **`--passphrase-fd`** __FILEDES__::
     File descriptor to read the passphrase from.  Note that unlike with the
     tor-gencert program, the entire file contents are read and used as
@@ -2444,6 +2450,13 @@ is non-zero):
     by the default GID. If the option is "auto", then we use the
     setting for DataDirectoryGroupReadable when the KeyDirectory is the
     same as the DataDirectory, and 0 otherwise. (Default: auto)
+
+[[ManualOnionKeyRotation]] **ManualOnionKeyRotation** **0**|**1**:
+    Force Tor to not rotate or expire its Curve25519
+    Onion Keys. This feature should only be used by people
+    experimenting with stateless relays or bridge
+    infrastructure where multiple Tor instances share the
+    same keys (Default: 0)
 
 [[MainloopStats]] **MainloopStats** **0**|**1**::
     Log main loop statistics every **HeartbeatPeriod** seconds. This is a log
