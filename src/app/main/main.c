@@ -62,6 +62,7 @@
 #include "lib/crypt_ops/crypto_format.h"
 #include "lib/crypt_ops/crypto_rand.h"
 #include "lib/crypt_ops/crypto_s2k.h"
+#include "lib/crypt_ops/crypto_util.h"
 #include "lib/net/resolve.h"
 #include "lib/trace/trace.h"
 
@@ -163,6 +164,10 @@ do_hup(void)
                "Continuing with old list.");
     }
   }
+
+  /* Check if onion keys were manually rotated? */
+  if (options->ManualOnionKeyRotation)
+    router_reload_manual_onion_keys();
 
   /* Rotate away from the old dirty circuits. This has to be done
    * after we've read the new options, but before we start using
@@ -864,6 +869,35 @@ do_keygen_family(const char *fname_base)
   return r;
 }
 
+/** Implement --keygen-onion; create an onion key and write it to a file.
+ */
+static int
+do_keygen_onion_key(const char *fname)
+{
+  int result = -1;
+  curve25519_keypair_t keys;
+
+  if (BUG(! fname))
+    goto done;
+
+  /* Generate new onion key. */
+  if (curve25519_keypair_generate(&keys, /* extra strong */ 1) < 0)
+    goto done;
+
+  /* Save it to disk. */
+  if (curve25519_keypair_write_to_file(&keys, fname, "onion") < 0)
+    goto done;
+
+  printf("Saved new Onion Key in file: %s\n", fname);
+
+  /* All good. */
+  result = 0;
+
+ done:
+  memwipe(&keys, 0, sizeof(keys));
+  return result;
+}
+
 static void
 init_addrinfo(void)
 {
@@ -1444,6 +1478,9 @@ tor_run_main(const tor_main_configuration_t *tor_cfg)
     break;
   case CMD_KEYGEN_FAMILY:
     result = do_keygen_family(get_options()->command_arg);
+    break;
+  case CMD_KEYGEN_ONION:
+    result = do_keygen_onion_key(get_options()->command_arg);
     break;
   case CMD_KEY_EXPIRATION:
     init_keys();
