@@ -60,7 +60,7 @@ a2x is installed, but for some reason it isn't working.  Sometimes
 this happens because required docbook support files are missing.
 Please install docbook-xsl, docbook-xml, and xmlto (Debian) or
 similar.  If you use homebrew on Mac OS X, install the docbook formula
-and add "export XML_CATALOG_FILES=/usr/local/etc/xml/catalog" to your
+and add "export XML_CATALOG_FILES=/opt/homebrew/etc/xml/catalog" to your
 .bashrc file.
 
 Alternatively, to build without manpages, use the --disable-asciidoc
