@@ -344,6 +344,7 @@ nt_service_main(void)
       case CMD_DUMP_CONFIG:
       case CMD_KEYGEN:
       case CMD_KEYGEN_FAMILY:
+      case CMD_KEYGEN_ONION:
       case CMD_KEY_EXPIRATION:
         log_err(LD_CONFIG, "Unsupported command (--list-fingerprint, "
                "--hash-password, --keygen, --dump-config, --verify-config, "
