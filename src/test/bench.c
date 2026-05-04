@@ -714,6 +714,8 @@ bench_cell_ops_cgo(void)
 static void
 bench_dh(void)
 {
+#define TLS_DH_KEYLEN (2048 / 8)
+
   const int iters = 1<<10;
   int i;
   uint64_t start, end;
@@ -721,15 +723,18 @@ bench_dh(void)
   reset_perftime();
   start = perftime();
   for (i = 0; i < iters; ++i) {
-    char dh_pubkey_a[DH1024_KEY_LEN], dh_pubkey_b[DH1024_KEY_LEN];
-    char secret_a[DH1024_KEY_LEN], secret_b[DH1024_KEY_LEN];
+    char dh_pubkey_a[TLS_DH_KEYLEN], dh_pubkey_b[TLS_DH_KEYLEN];
+    char secret_a[TLS_DH_KEYLEN], secret_b[TLS_DH_KEYLEN];
+    int rv;
     ssize_t slen_a, slen_b;
     crypto_dh_t *dh_a = crypto_dh_new(DH_TYPE_TLS);
     crypto_dh_t *dh_b = crypto_dh_new(DH_TYPE_TLS);
     crypto_dh_generate_public(dh_a);
     crypto_dh_generate_public(dh_b);
-    crypto_dh_get_public(dh_a, dh_pubkey_a, sizeof(dh_pubkey_a));
+    rv = crypto_dh_get_public(dh_a, dh_pubkey_a, sizeof(dh_pubkey_a));
+    tor_assert(rv == 0);
     crypto_dh_get_public(dh_b, dh_pubkey_b, sizeof(dh_pubkey_b));
+    tor_assert(rv == 0);
     slen_a = crypto_dh_compute_secret(LOG_NOTICE,
                                       dh_a, dh_pubkey_b, sizeof(dh_pubkey_b),
                                       secret_a, sizeof(secret_a));
@@ -742,7 +747,7 @@ bench_dh(void)
     crypto_dh_free(dh_b);
   }
   end = perftime();
-  printf("Complete DH handshakes (1024 bit, public and private ops):\n"
+  printf("Complete DH handshakes (2048 bit, public and private ops):\n"
          "      %f millisec each.\n", NANOCOUNT(start, end, iters)/1e6);
 }
 
