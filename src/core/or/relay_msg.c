@@ -67,8 +67,14 @@ relay_msg_clear(relay_msg_t *msg)
 relay_msg_t *
 relay_msg_copy(const relay_msg_t *msg)
 {
+#if defined(ENABLE_FRAGILE_HARDENING)
+  const size_t DEFENSE_IN_DEPTH = 0;
+#else
+  const size_t DEFENSE_IN_DEPTH = 4;
+#endif
   tor_assert(msg->length <= RELAY_PAYLOAD_SIZE_MAX);
-  void *alloc = tor_malloc_zero(sizeof(relay_msg_t) + msg->length);
+  void *alloc = tor_malloc_zero(sizeof(relay_msg_t) + msg->length +
+                                DEFENSE_IN_DEPTH);
   relay_msg_t *new_msg = alloc;
   uint8_t *body = ((uint8_t*)alloc) + sizeof(relay_msg_t);
 
