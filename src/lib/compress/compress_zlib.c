@@ -202,7 +202,7 @@ tor_zlib_compress_new(int compress_,
  *
  * Return TOR_COMPRESS_DONE if we've finished the entire
  * compression/decompression.
- * Return TOR_COMPRESS_OK if we're processed everything from the input.
+ * Return TOR_COMPRESS_OK if we've processed everything from the input.
  * Return TOR_COMPRESS_BUFFER_FULL if we're out of space on <b>out</b>.
  * Return TOR_COMPRESS_ERROR if the stream is corrupt.
  */
