@@ -521,7 +521,7 @@ proxy_prepare_for_restart(managed_proxy_t *mp)
 {
   transport_t *t_tmp = NULL;
 
-  /* Rate limit this log as a regurlarly dying PT would log this once every
+  /* Rate limit this log as a regularly dying PT would log this once every
    * second (retry time). Every 5 minutes is likely loud enough to notice. */
   static ratelim_t log_died_lim = RATELIM_INIT(300);
   log_fn_ratelim(&log_died_lim, LOG_WARN, LD_PT,
@@ -1394,7 +1394,7 @@ handle_status_message(const config_line_t *values,
 
 /** Return a newly allocated string that tor should place in
  * TOR_PT_SERVER_TRANSPORT_OPTIONS while configuring the server
- * manged proxy in <b>mp</b>. Return NULL if no such options are found. */
+ * managed proxy in <b>mp</b>. Return NULL if no such options are found. */
 STATIC char *
 get_transport_options_for_server_proxy(const managed_proxy_t *mp)
 {

@@ -470,7 +470,7 @@ rep_hist_get_n_write_limit_reached(void)
   return stats_n_write_limit_reached;
 }
 
-/** Returns an allocated string for server descriptor for publising information
+/** Return an allocated string for server descriptor for publishing information
  * on whether we are overloaded or not. */
 char *
 rep_hist_get_overload_general_line(void)

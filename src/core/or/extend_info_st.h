@@ -43,7 +43,7 @@ struct extend_info_t {
    * of congestion control parameters */
   bool exit_supports_congestion_control;
   /**
-   * True if this hop supports CGO relay message enryption,
+   * True if this hop supports CGO relay message encryption,
    * and we intend to use it.
    */
   bool enable_cgo;

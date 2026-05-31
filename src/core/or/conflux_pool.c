@@ -646,7 +646,7 @@ unlinked_close_all_legs(unlinked_circuits_t *unlinked)
   smartlist_free(circ_to_close);
 }
 
-/** Either closee all legs of the given unlinked set or delete it from the pool
+/** Either close all legs of the given unlinked set or delete it from the pool
  * and free its memory.
  *
  * Important: The unlinked object is freed opportunistically when legs are
@@ -1165,7 +1165,7 @@ conflux_launch_leg(const uint8_t *nonce)
 
   /* The above call to establish a circuit can send us back a closed
    * circuit if the OOM handler closes this very circuit while in that
-   * function. OOM handler runs everytime we queue a cell on a circuit which
+   * function. OOM handler runs every time we queue a cell on a circuit which
    * the above function does with the CREATE cell.
    *
    * The BUG() checks after are in the same spirit which is that there are so

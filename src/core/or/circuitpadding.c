@@ -673,7 +673,7 @@ circpad_machine_sample_delay(circpad_machine_runtime_t *mi)
   tor_assert(curr_bin < CIRCPAD_INFINITY_BIN(state));
 
   bin_start = circpad_histogram_bin_to_usec(mi, curr_bin);
-  /* We don't need to reduct 1 from the upper bound because the random range
+  /* We don't need to deduct 1 from the upper bound because the random range
    * function below samples from [bin_start, bin_end) */
   bin_end = circpad_histogram_bin_to_usec(mi, curr_bin+1);
 
