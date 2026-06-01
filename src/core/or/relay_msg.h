@@ -13,6 +13,17 @@
 
 #include "core/or/relay_msg_st.h"
 
+/** An amount of overhead introduced by defense-in-depth code in
+ * `relay_msg_copy()`.
+ *
+ * (We add this overhead as a defense-in-depth mechanism to limit the
+ * risk of additional bugs like #41245 and #41254.) */
+#if defined(ENABLE_FRAGILE_HARDENING)
+#define RELAY_MSG_COPY_OVERHEAD 0
+#else
+#define RELAY_MSG_COPY_OVERHEAD 4
+#endif
+
 /* Relay message */
 void relay_msg_free_(relay_msg_t *msg);
 void relay_msg_clear(relay_msg_t *msg);

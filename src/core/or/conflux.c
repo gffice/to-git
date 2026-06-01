@@ -46,7 +46,8 @@ static uint64_t total_ooo_q_bytes = 0;
 size_t
 conflux_msg_alloc_cost(conflux_msg_t *msg)
 {
-  return msg->msg->length + sizeof(conflux_msg_t) + sizeof(relay_msg_t);
+  return msg->msg->length + sizeof(conflux_msg_t) + sizeof(relay_msg_t) +
+    RELAY_MSG_COPY_OVERHEAD;
 }
 
 /**
