@@ -126,7 +126,7 @@ static int service_encode_descriptor(const hs_service_t *service,
                                      char **encoded_out);
 
 /** Helper: Function to compare two objects in the service map. Return 1 if the
- * two service have the same master public identity key. */
+ * two services have the same master public identity key. */
 static inline int
 hs_service_ht_eq(const hs_service_t *first, const hs_service_t *second)
 {
@@ -668,8 +668,8 @@ service_desc_find_by_intro(const hs_service_t *service,
  * ident. If not NULL, service, ip or desc are set if the object can be found.
  * They are untouched if they can't be found.
  *
- * This is an helper function because we do those lookups often so it's more
- * convenient to simply call this functions to get all the things at once. */
+ * This is a helper function because we do those lookups often so it's more
+ * convenient to simply call this function to get all the things at once. */
 STATIC void
 get_objects_from_ident(const hs_ident_circuit_t *ident,
                        hs_service_t **service, hs_service_intro_point_t **ip,
@@ -685,8 +685,8 @@ get_objects_from_ident(const hs_ident_circuit_t *ident,
     *service = s;
   }
 
-  /* From the service object, get the intro point object of that circuit. The
-   * following will query both descriptors intro points list. */
+  /* From the service object, get the intro point object of that circuit.
+   * This will query the intro points list of both descriptors. */
   if (s && ip) {
     *ip = service_intro_point_find(s, &ident->intro_auth_pk);
   }
@@ -4594,7 +4594,7 @@ hs_service_get_metrics_stores(void)
   return list;
 }
 
-/** Lookup the global service map for the given identitiy public key and
+/** Lookup the global service map for the given identity public key and
  * return the service object if found, NULL if not. */
 hs_service_t *
 hs_service_find(const ed25519_public_key_t *identity_pk)

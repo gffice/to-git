@@ -1465,8 +1465,7 @@ build_descriptor_cookie_keys(const hs_subcredential_t *subcredential,
 /** Decrypt the descriptor cookie given the descriptor, the auth client,
  * and the client secret key. On success, return 0 and a newly allocated
  * descriptor cookie descriptor_cookie_out. On error or if the client id
- * is invalid, return -1 and descriptor_cookie_out is set to
- * NULL. */
+ * is invalid, return -1 and set descriptor_cookie_out to NULL. */
 static int
 decrypt_descriptor_cookie(const hs_descriptor_t *desc,
                           const hs_desc_authorized_client_t *client,
@@ -1503,7 +1502,7 @@ decrypt_descriptor_cookie(const hs_descriptor_t *desc,
                              &keystream);
   tor_assert(keystream_length > 0);
 
-  /* If the client id of auth client is not the same as the calculcated
+  /* If the client id of auth client is not the same as the calculated
    * client id, it means that this auth client is invalid according to the
    * client secret key client_auth_sk. */
   if (tor_memneq(client->client_id, keystream, HS_DESC_CLIENT_ID_LEN)) {

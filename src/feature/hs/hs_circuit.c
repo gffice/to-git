@@ -925,10 +925,10 @@ enqueue_rend_request(const hs_service_t *service, hs_service_intro_point_t *ip,
 /* Public API */
 /* ========== */
 
-/** Setup on the given circuit congestion control with the given parameters.
+/** Set up circuit congestion control with the given parameters.
  *
- * This function assumes that congestion control is enabled on the network and
- * so it is the caller responsability to make sure of it. */
+ * This function assumes that congestion control is enabled on the network;
+ * it is the caller's responsibility to make sure of it. */
 void
 hs_circ_setup_congestion_control(origin_circuit_t *origin_circ,
                                  uint8_t sendme_inc, bool is_single_onion)
@@ -944,7 +944,7 @@ hs_circ_setup_congestion_control(origin_circuit_t *origin_circ,
   circ_params.cc_enabled = true;
   circ_params.sendme_inc_cells = sendme_inc;
 
-  /* It is setup on the circuit in order to indicate that congestion control is
+  /* Indicate on the circuit that congestion control is
    * enabled. It will be transferred to the RP crypt_path_t once the handshake
    * is finalized in finalize_rend_circuit() for both client and service
    * because the final hop is not available until then. */
@@ -961,7 +961,7 @@ hs_circ_setup_congestion_control(origin_circuit_t *origin_circ,
 }
 
 /** Return an introduction point circuit matching the given intro point object.
- * NULL is returned is no such circuit can be found. */
+ * Return NULL if no such circuit can be found. */
 origin_circuit_t *
 hs_circ_service_get_intro_circ(const hs_service_intro_point_t *ip)
 {
@@ -971,8 +971,8 @@ hs_circ_service_get_intro_circ(const hs_service_intro_point_t *ip)
 }
 
 /** Return an introduction point established circuit matching the given intro
- * point object. The circuit purpose has to be CIRCUIT_PURPOSE_S_INTRO. NULL
- * is returned is no such circuit can be found. */
+ * point object. The circuit purpose has to be CIRCUIT_PURPOSE_S_INTRO. Return
+ * NULL if no such circuit can be found. */
 origin_circuit_t *
 hs_circ_service_get_established_intro_circ(const hs_service_intro_point_t *ip)
 {

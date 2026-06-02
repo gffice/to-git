@@ -8,7 +8,7 @@
  * \file addressmap.c
  *
  * \brief The addressmap module manages the processes by which we rewrite
- * addresses in client requess.  It handles the MapAddress controller and
+ * addresses in client requests.  It handles the MapAddress controller and
  * torrc commands, and the TrackHostExits feature, and the client-side DNS
  * cache (deprecated).
  */

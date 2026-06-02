@@ -1035,7 +1035,7 @@ test_crypto_sha3_xof(void *arg)
  * vectors out there for our H(len(k) || k || m) construction. Hence what we
  * are gonna do is test our crypto_mac_sha3_256() function against manually
  * doing H(len(k) || k||m).  If in the future the Keccak group decides to
- * standarize an MAC construction and make test vectors, we should
+ * standardize a MAC construction and make test vectors, we should
  * incorporate them here. */
 static void
 test_crypto_mac_sha3(void *arg)

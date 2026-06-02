@@ -2600,7 +2600,7 @@ test_entry_guard_upgrade_a_circuit(void *arg)
   tt_int_op(smartlist_len(result), OP_EQ, 1);
   origin_circuit_t *oc = smartlist_get(result, 0);
 
-  /* circ1 was started first, so we'll get told to ugrade it... */
+  /* circ1 was started first, so we'll get told to upgrade it... */
   tt_ptr_op(oc, OP_EQ, data->circ1);
 
   /* And the guard state should be complete */

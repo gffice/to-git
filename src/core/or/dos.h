@@ -164,7 +164,7 @@ dos_conn_defense_type_t dos_conn_addr_get_defense_type(const tor_addr_t *addr);
  * Stream creation DoS mitigation subsystem interface.
  */
 
-/* DoSStreamCreationEnabled default. Disabled by deault. */
+/* DoSStreamCreationEnabled default. Disabled by default. */
 #define DOS_STREAM_ENABLED_DEFAULT 0
 /* DoSStreamCreationDefenseType maps to the dos_stream_defense_type_t enum */
 #define DOS_STREAM_DEFENSE_TYPE_DEFAULT DOS_STREAM_DEFENSE_REFUSE_STREAM

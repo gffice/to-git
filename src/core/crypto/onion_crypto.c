@@ -375,7 +375,7 @@ negotiate_v3_ntor_server_circ_params(const uint8_t *param_request_msg,
  * and return the length of the reply. On failure, return -1.
  *
  * Requires that *keys_len_out of bytes are allocated at keys_out;
- * adjusts *keys_out_len to the number of bytes actually genarated.
+ * adjusts *keys_out_len to the number of bytes actually generated.
  */
 int
 onion_skin_server_handshake(int type,
@@ -585,7 +585,7 @@ negotiate_v3_ntor_client_circ_params(const uint8_t *param_response_msg,
  * complaining to the user about.
  *
  * Requires that *keys_len_out of bytes are allocated at keys_out;
- * adjusts *keys_out_len to the number of bytes actually genarated.
+ * adjusts *keys_out_len to the number of bytes actually generated.
  */
 int
 onion_skin_client_handshake(int type,
