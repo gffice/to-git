@@ -223,9 +223,9 @@ struct curve25519_public_key_t;
 #define RELAY_COMMAND_XON 44
 
 /* NOTE: Any new command from above MUST be added to this function. */
-/** Helper to learn if we know the relay command. Unfortuantely, they are not
- * contigous and so we need this kind of big switch. We could do better but for
- * now, we'll run with this. */
+/** Helper to learn if we know the relay command. Unfortunately, they are not
+ * contiguous and so we need this kind of big switch. We could do better but
+ * for now, we'll run with this. */
 static inline bool
 is_known_relay_command(const uint8_t cmd)
 {

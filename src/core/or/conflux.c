@@ -189,7 +189,7 @@ conflux_get_circ_bytes_allocation(const circuit_t *circ)
 
 /** Return the total memory allocation in bytes by the subsystem.
  *
- * At the moment, only out of order queues are consiered. */
+ * At the moment, only out of order queues are considered. */
 uint64_t
 conflux_get_total_bytes_allocation(void)
 {
@@ -206,7 +206,7 @@ conflux_handle_oom(size_t bytes_to_remove)
    * circuit clean up which will affect conflux sets, by pruning oldest
    * circuits. */
 
-  log_info(LD_CIRC, "OOM handler triggered. OOO queus allocation: %" PRIu64,
+  log_info(LD_CIRC, "OOM handler triggered. OOO queues allocation: %" PRIu64,
            total_ooo_q_bytes);
   return 0;
 }
@@ -422,9 +422,9 @@ conflux_can_switch(const conflux_t *cfx)
  * Favor the circuit with the lowest RTT that still has space in the
  * congestion window up to the ratio of RTTs.
  *
- * This algorithm should only use auxillary legs up to the point
+ * This algorithm should only use auxiliary legs up to the point
  * where their data arrives roughly the same time as the lowest
- * RTT leg. It will not utilize the full cwnd of auxillary legs,
+ * RTT leg. It will not utilize the full cwnd of auxiliary legs,
  * except in slow start. Therefore, out-of-order queue bloat should
  * be minimized to just the slow-start phase.
  */
@@ -498,9 +498,9 @@ conflux_decide_circ_for_send(conflux_t *cfx,
 
   circuit_t *new_circ = conflux_decide_next_circ(cfx);
 
-  /* Because our congestion window only cover relay data command, we can end up
-   * in a situation where we need to send non data command when all circuits
-   * are at capacity. For those cases, keep using the *current* leg,
+  /* Because our congestion window only covers relay data commands, we can end
+   * up in a situation where we need to send a non data command when all
+   * circuits are at capacity. For those cases, keep using the *current* leg,
    * so these commands arrive in-order. */
   if (!new_circ && relay_command != RELAY_COMMAND_DATA) {
     /* Curr leg should be set, because conflux_decide_next_circ() should
@@ -541,7 +541,7 @@ conflux_decide_circ_for_send(conflux_t *cfx,
 
       if (cfx->curr_leg->last_seq_sent > cfx->prev_leg->last_seq_sent) {
         /* Having incoherent sequence numbers, log warn about it but rate limit
-         * it to every hour so we avoid redundent report. */
+         * it to every hour so we avoid redundant reports. */
         static ratelim_t rlimit = RATELIM_INIT(60 * 60);
         log_fn_ratelim(&rlimit, LOG_WARN, LD_BUG,
                        "Current conflux leg last_seq_sent=%"PRIu64
@@ -778,7 +778,7 @@ circuit_ccontrol(const circuit_t *circ)
 // TODO-329-TUNING: For LowRTT, we can at most switch every SENDME,
 // but for BLEST, we should switch at most every cwnd.. But
 // we do not know the other side's CWND here.. We can at best
-// asssume it is above the cwnd_min
+// assume it is above the cwnd_min.
 #define CONFLUX_MIN_LINK_INCREMENT 31
 /**
  * Validate and handle RELAY_COMMAND_CONFLUX_SWITCH.
@@ -801,7 +801,7 @@ conflux_process_switch_command(circuit_t *in_circ,
   }
 
   /* If there is no conflux object negotiated, this is invalid.
-   * log and close circ */
+   * Log and close circ. */
   if (!cfx) {
     log_warn(LD_BUG, "Got a conflux switch command on a circuit without "
              "conflux negotiated. Closing circuit.");
@@ -836,7 +836,7 @@ conflux_process_switch_command(circuit_t *in_circ,
   relative_seq = conflux_cell_parse_switch(msg);
 
   /*
-   * We have to make sure that the switch command is truely
+   * We have to make sure that the switch command is truly
    * incrementing the sequence number, or else it becomes
    * a side channel that can be spammed for traffic analysis.
    */
@@ -857,7 +857,7 @@ conflux_process_switch_command(circuit_t *in_circ,
   // But before Prop#340, it doesn't make much sense to do this.
   // C-Tor is riddled with side-channels like this anyway, unless
   // vanguards is in use. And this feature is not supported by
-  // onion servicees in C-Tor, so we're good there.
+  // onion services in C-Tor, so we're good there.
 
   /* Update the absolute sequence number on this leg by the delta.
    * Since this cell is not multiplexed, we do not count it towards

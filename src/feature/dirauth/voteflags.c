@@ -552,7 +552,7 @@ dirserv_set_routerstatus_flags(routerstatus_t *rs)
 
   tor_assert(rs);
 
-  /* Assign Guard flag to relays that can get it unconditionnaly. */
+  /* Assign Guard flag to relays that get it unconditionally. */
   if (routerset_contains_routerstatus(options->AuthDirVoteGuard, rs, 0)) {
     rs->is_possible_guard = 1;
   }

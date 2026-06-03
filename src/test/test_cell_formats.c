@@ -103,7 +103,7 @@ test_cfmt_begin_cells(void *arg)
   tt_int_op(0, OP_EQ, bcell.is_begindir);
   tor_free(bcell.address);
 
-  /* A significantly loner begin cell */
+  /* A significantly longer begin cell */
   memset(&bcell, 0x7f, sizeof(bcell));
   {
   const char c[] = "here-is-a-nice-long.hostname.com:65535";
@@ -128,7 +128,7 @@ test_cfmt_begin_cells(void *arg)
   tt_int_op(0, OP_EQ, bcell.is_begindir);
   tor_free(bcell.address);
 
-  /* An IPv6 begin cell. Let's make sure we handle colons*/
+  /* An IPv6 begin cell. Let's make sure we handle colons. */
   memset(&bcell, 0x7f, sizeof(bcell));
   make_relay_msg(&msg, RELAY_COMMAND_BEGIN,
                   "[2620::6b0:b:1a1a:0:26e5:480e]:80", 34);

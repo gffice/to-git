@@ -68,7 +68,7 @@ relay_crypto_sendme_tag_len(const relay_crypto_t *crypto)
 
 /**
  * Handle a single layer of client-side backward encryption
- * with crypto of an arbitary type.
+ * with crypto of an arbitrary type.
  */
 static inline bool
 relay_crypt_client_backward(relay_crypto_t *crypto, cell_t *cell)
@@ -92,7 +92,7 @@ relay_crypt_client_backward(relay_crypto_t *crypto, cell_t *cell)
 
 /**
  * Handle a relay-side forward encryption
- * with crypto of an arbitary type.
+ * with crypto of an arbitrary type.
  */
 static inline bool
 relay_crypt_relay_forward(relay_crypto_t *crypto, cell_t *cell)
@@ -115,7 +115,7 @@ relay_crypt_relay_forward(relay_crypto_t *crypto, cell_t *cell)
 }
 
 /**
- * Handle relay-side backward encryption with crypto of an arbitary type.
+ * Handle relay-side backward encryption with crypto of an arbitrary type.
  */
 static inline void
 relay_crypt_relay_backward(relay_crypto_t *crypto, cell_t *cell)

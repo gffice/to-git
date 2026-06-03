@@ -845,8 +845,8 @@ connection_ap_process_end_not_open(
     entry_connection_t *conn, crypt_path_t *layer_hint)
 {
   node_t *exitrouter;
-  /* Defense in depth, the caller checks this but this protect us for the
-   * future, this is C afterall. No reason in the END cell. */
+  /* Defense in depth, the caller checks this but this protects us for the
+   * future, this is C after all. No reason in the END cell. */
   if (msg->length == 0) {
     return -END_CIRC_REASON_TORPROTOCOL;
   }

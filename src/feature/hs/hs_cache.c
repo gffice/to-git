@@ -162,7 +162,7 @@ cache_store_v3_as_dir(hs_cache_dir_descriptor_t *desc)
      * pruning is an expensive O(n^2) option to keep finding lowest
      * download count descs. */
     size_t bytes_to_remove = current_cache_bytes/2;
-    /* Ensure user didn't set a really low max hsdir cache vlue */
+    /* Ensure user didn't set a really low max hsdir cache value */
     if (HSCACHE_PRUNE_SPARE_ROOM < max_cache_bytes) {
       bytes_to_remove = current_cache_bytes -
                          (max_cache_bytes - HSCACHE_PRUNE_SPARE_ROOM);
@@ -205,7 +205,7 @@ cache_store_v3_as_dir(hs_cache_dir_descriptor_t *desc)
    * don't have the entry or we have a newer descriptor and the old one
    * has been removed from the cache. We do this *after* pruning
    * other descriptors so that this descriptor is not immediately pruned,
-   * if new. This prevents probing to detect OOM threshholds via its
+   * if new. This prevents probing to detect OOM thresholds via its
    * absence. */
   store_v3_desc_as_dir(desc);
 

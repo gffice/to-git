@@ -825,13 +825,13 @@ handle_control_extendcircuit(control_connection_t *conn,
   SMARTLIST_FOREACH(nodes, const node_t *, node,
   {
     /* We treat every hop as an exit to try to negotiate congestion
-     * control, because we have no idea which hop the controller wil
+     * control, because we have no idea which hop the controller will
      * try to use for streams and when */
     extend_info_t *info = extend_info_from_node(node, first_node, true);
     if (!info) {
       tor_assert_nonfatal(first_node);
       log_warn(LD_CONTROL,
-               "controller tried to connect to a node that lacks a suitable "
+               "Controller tried to connect to a node that lacks a suitable "
                "descriptor, or which doesn't have any "
                "addresses that are allowed by the firewall configuration; "
                "circuit marked for closing.");
