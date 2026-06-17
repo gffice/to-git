@@ -423,7 +423,7 @@ get_second_cached_disaster_srv(void)
 #endif /* defined(TOR_UNIT_TESTS) */
 
 /** When creating a blinded key, we need a parameter which construction is as
- * follow: H(pubkey | [secret] | ed25519-basepoint | nonce).
+ * follows: H(pubkey | [secret] | ed25519-basepoint | nonce).
  *
  * The nonce has a pre-defined format which uses the time period number
  * period_num and the start of the period in second start_time_period.
@@ -446,7 +446,7 @@ build_blinded_key_param(const ed25519_public_key_t *pubkey,
   tor_assert(pubkey);
   tor_assert(param_out);
 
-  /* Create the nonce N. The construction is as follow:
+  /* Create the nonce N. The construction is as follows:
    *    N = "key-blind" || INT_8(period_num) || INT_8(period_length) */
   memcpy(nonce, HS_KEYBLIND_NONCE_PREFIX, HS_KEYBLIND_NONCE_PREFIX_LEN);
   offset += HS_KEYBLIND_NONCE_PREFIX_LEN;
@@ -456,8 +456,13 @@ build_blinded_key_param(const ed25519_public_key_t *pubkey,
   offset += sizeof(uint64_t);
   tor_assert(offset == HS_KEYBLIND_NONCE_LEN);
 
-  /* Generate the parameter h and the construction is as follow:
-   *    h = H(BLIND_STRING | pubkey | [secret] | ed25519-basepoint | N) */
+  /* Generate the parameter h. The construction is as follows:
+   *    h = H(BLIND_STRING | pubkey | [secret] | ed25519-basepoint | N)
+   *
+   * Note that below we have a surprise where we use sizeof(blind_str)
+   * not strlen(blind_str), i.e. we include the nul byte at the end in
+   * our hashed info. We ended up specifying that nul byte in the spec
+   * rather than fixing it here in the code. */
   digest = crypto_digest256_new(DIGEST_SHA3_256);
   crypto_digest_add_bytes(digest, blind_str, sizeof(blind_str));
   crypto_digest_add_bytes(digest, (char *) pubkey, ED25519_PUBKEY_LEN);
