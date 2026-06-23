@@ -95,6 +95,9 @@ proto_entry_free_(proto_entry_t *entry)
   tor_free(entry);
 }
 
+/** The smallest possible protocol version. */
+#define MIN_PROTOCOL_VERSION (1)
+
 /** The largest possible protocol version. */
 #define MAX_PROTOCOL_VERSION (63)
 
@@ -125,7 +128,9 @@ parse_version_range(const char *s, const char *end_of_range,
 
   /* Note that this wouldn't be safe if we didn't know that eventually,
    * we'd hit a NUL */
-  low = (uint32_t) tor_parse_ulong(s, 10, 0, MAX_PROTOCOL_VERSION, &ok, &next);
+  low = (uint32_t) tor_parse_ulong(s, 10,
+                                   MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION,
+                                   &ok, &next);
   if (!ok)
     goto error;
   if (next > end_of_range)
@@ -143,8 +148,9 @@ parse_version_range(const char *s, const char *end_of_range,
   if (!TOR_ISDIGIT(*s)) {
     goto error;
   }
-  high = (uint32_t) tor_parse_ulong(s, 10, 0,
-                                    MAX_PROTOCOL_VERSION, &ok, &next);
+  high = (uint32_t) tor_parse_ulong(s, 10,
+                                    MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION,
+                                    &ok, &next);
   if (!ok)
     goto error;
   if (next != end_of_range)
