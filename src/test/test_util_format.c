@@ -298,8 +298,7 @@ test_util_format_base32_encode(void *arg)
      * such (and same goes for all test case.):
      *
      *  b = bytes("blahbleh12", 'utf-8')
-     *  base64.b32encode(b)
-     *  (result in lower case)
+     *  base64.b32encode(b).lower().replace(b'=', b'')
      */
     const char *expected = "mjwgc2dcnrswqmjs";
 
