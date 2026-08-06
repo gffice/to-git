@@ -519,15 +519,15 @@ protover_get_recommended_client_protocols(void)
 {
   return
     "Cons=2 "
-    "Desc=2 "
+    "Desc=2-4 "
     "DirCache=2 "
     "FlowCtrl=1-2 "
     "HSDir=2 "
     "HSIntro=4 "
     "HSRend=2 "
     "Link=4-5 "
-    "Microdesc=2 "
-    "Relay=2-4";
+    "Microdesc=2-3 "
+    "Relay=2-6";
 }
 
 /** Return the recommended relay protocols list that directory authorities
@@ -537,7 +537,7 @@ protover_get_recommended_relay_protocols(void)
 {
   return
     "Cons=2 "
-    "Desc=2 "
+    "Desc=2-4 "
     "DirCache=2 "
     "FlowCtrl=1-2 "
     "HSDir=2 "
@@ -545,8 +545,8 @@ protover_get_recommended_relay_protocols(void)
     "HSRend=2 "
     "Link=4-5 "
     "LinkAuth=3 "
-    "Microdesc=2 "
-    "Relay=2-4";
+    "Microdesc=2-3 "
+    "Relay=2-6";
 }
 
 /** Return the required client protocols list that directory authorities
