@@ -1,5 +1,5 @@
   o Minor features (directory authority):
-    - Provide a new `AuthDirSupport048Clients` option, which is enabled by default.
+    - Provide a new `AuthDirSupport048Clients` option, which is disabled by default.
       When this option is disabled, authorities will accept router descriptors
       that do not contain TAP keys, and will be willing to generate microdescriptors
       without TAP keys in response to such descriptors.
