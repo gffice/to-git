@@ -351,7 +351,7 @@ congestion_control_enabled(void)
 
   opts = get_options();
 
-  /* If the user has set "__AlwaysCongesttionControl",
+  /* If the user has set "__AlwaysCongestionControl",
    * then always try to negotiate congestion control, regardless
    * of consensus param. This is to be used for testing and sbws.
    *
