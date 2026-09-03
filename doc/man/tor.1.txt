@@ -3384,7 +3384,7 @@ on the public Tor network.
     consensuses that would confuse clients running 0.4.8 and earlier.
     If false, 0.4.8 clients will get a somewhat degraded view of the network,
     but will generally continue working.
-    (Default: 1)
+    (Default: 0)
 
 [[AuthDirTestEd25519LinkKeys]] **AuthDirTestEd25519LinkKeys**  **0**|**1**::
     Authoritative directories only. If this option is set to 0, then we treat
