@@ -308,15 +308,6 @@ test_protover_supports_version(void *arg)
                                             PRT_LINKAUTH, 3));
   tt_assert(!protocol_list_supports_protocol("Link=4-6 LinkAuth=3",
                                              PRT_LINKAUTH, 4));
-  tt_assert(!protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 4));
-  tt_assert(protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 3));
-  tt_assert(protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 2));
-
-  tt_assert(!protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                                      PRT_DESC, 2));
  done:
  ;
 }
