@@ -806,11 +806,6 @@ typedef struct protover_summary_flags_t {
    * requires LinkAuth=3. */
   unsigned int supports_ed25519_link_handshake_compat:1;
 
-  /** True iff this router has a protocol list that allows it to negotiate
-   * ed25519 identity keys on a link handshake, at all. This requires some
-   * LinkAuth=X for X >= 3. */
-  unsigned int supports_ed25519_link_handshake_any:1;
-
   /** True iff this router has a protocol list that allows it to be an
    * introduction point supporting ed25519 authentication key which is part of
    * the v3 protocol detailed in proposal 224. This requires HSIntro=4. */

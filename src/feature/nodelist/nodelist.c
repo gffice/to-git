@@ -1230,7 +1230,7 @@ node_ed25519_id_matches(const node_t *node, const ed25519_public_key_t *id)
 /** Dummy object that should be unreturnable.  Used to ensure that
  * node_get_protover_summary_flags() always returns non-NULL. */
 static const protover_summary_flags_t zero_protover_flags = {
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
 /** Return the protover_summary_flags for a given node. */
@@ -1252,9 +1252,7 @@ node_get_protover_summary_flags(const node_t *node)
 }
 
 /** Return true iff <b>node</b> supports authenticating itself
- * by ed25519 ID during the link handshake.  If <b>compatible_with_us</b>,
- * it needs to be using a link authentication method that we understand.
- * If not, any plausible link authentication method will do. */
+ * by ed25519 ID during the link handshake. */
 MOCK_IMPL(bool,
 node_supports_ed25519_link_authentication,(const node_t *node,
                                            bool compatible_with_us))
@@ -1264,10 +1262,13 @@ node_supports_ed25519_link_authentication,(const node_t *node,
 
   const protover_summary_flags_t *pv = node_get_protover_summary_flags(node);
 
-  if (compatible_with_us)
+  if (compatible_with_us) {
     return pv->supports_ed25519_link_handshake_compat;
-  else
-    return pv->supports_ed25519_link_handshake_any;
+  } else {
+    // LinkAuth=3 is currently (2026) required; we can send the
+    // Ed25519 ID to the relay unconditionally when extending.
+    return true;
+  }
 }
 
 /** Return true iff <b>node</b> supports the hidden service directory version

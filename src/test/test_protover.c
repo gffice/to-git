@@ -308,15 +308,6 @@ test_protover_supports_version(void *arg)
                                             PRT_LINKAUTH, 3));
   tt_assert(!protocol_list_supports_protocol("Link=4-6 LinkAuth=3",
                                              PRT_LINKAUTH, 4));
-  tt_assert(!protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 4));
-  tt_assert(protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 3));
-  tt_assert(protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                             PRT_LINKAUTH, 2));
-
-  tt_assert(!protocol_list_supports_protocol_or_later("Link=4-6 LinkAuth=3",
-                                                      PRT_DESC, 2));
  done:
  ;
 }
@@ -641,7 +632,6 @@ test_protover_vote_roundtrip_ours(void *args)
             "supports_initiating_ipv6_extends: %d,\n" \
             "supports_canonical_ipv6_conns: %d,\n" \
             "supports_ed25519_link_handshake_compat: %d,\n" \
-            "supports_ed25519_link_handshake_any: %d,\n" \
             "supports_ed25519_hs_intro: %d,\n" \
             "supports_establish_intro_dos_extension: %d,\n" \
             "supports_v3_hsdir: %d,\n" \
@@ -654,7 +644,6 @@ test_protover_vote_roundtrip_ours(void *args)
             (flags).supports_initiating_ipv6_extends, \
             (flags).supports_canonical_ipv6_conns, \
             (flags).supports_ed25519_link_handshake_compat, \
-            (flags).supports_ed25519_link_handshake_any, \
             (flags).supports_ed25519_hs_intro, \
             (flags).supports_establish_intro_dos_extension, \
             (flags).supports_v3_hsdir, \
@@ -748,11 +737,9 @@ test_protover_summarize_flags(void *args)
   DEBUG_PROTOVER(flags);
   tt_int_op(flags.protocols_known, OP_EQ, 1);
   tt_int_op(flags.supports_ed25519_link_handshake_compat, OP_EQ, 1);
-  tt_int_op(flags.supports_ed25519_link_handshake_any, OP_EQ, 1);
   /* Now clear those flags, and check the rest are zero */
   flags.protocols_known = 0;
   flags.supports_ed25519_link_handshake_compat = 0;
-  flags.supports_ed25519_link_handshake_any = 0;
   tt_mem_op(&flags, OP_EQ, &zero_flags, sizeof(flags));
 
   /* Test one greater */
@@ -763,11 +750,9 @@ test_protover_summarize_flags(void *args)
   DEBUG_PROTOVER(flags);
   tt_int_op(flags.protocols_known, OP_EQ, 1);
   tt_int_op(flags.supports_ed25519_link_handshake_compat, OP_EQ, 0);
-  tt_int_op(flags.supports_ed25519_link_handshake_any, OP_EQ, 1);
   /* Now clear those flags, and check the rest are zero */
   flags.protocols_known = 0;
   flags.supports_ed25519_link_handshake_compat = 0;
-  flags.supports_ed25519_link_handshake_any = 0;
   tt_mem_op(&flags, OP_EQ, &zero_flags, sizeof(flags));
 
   /* Test one less */
@@ -778,11 +763,9 @@ test_protover_summarize_flags(void *args)
   DEBUG_PROTOVER(flags);
   tt_int_op(flags.protocols_known, OP_EQ, 1);
   tt_int_op(flags.supports_ed25519_link_handshake_compat, OP_EQ, 0);
-  tt_int_op(flags.supports_ed25519_link_handshake_any, OP_EQ, 0);
   /* Now clear those flags, and check the rest are zero */
   flags.protocols_known = 0;
   flags.supports_ed25519_link_handshake_compat = 0;
-  flags.supports_ed25519_link_handshake_any = 0;
   tt_mem_op(&flags, OP_EQ, &zero_flags, sizeof(flags));
 
   /* We don't test "one more" and "one less" for each protocol version.
