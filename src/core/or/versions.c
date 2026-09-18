@@ -442,11 +442,6 @@ memoize_protover_summary(protover_summary_flags_t *out,
   out->supports_ed25519_link_handshake_compat =
     protocol_list_supports_protocol(protocols, PRT_LINKAUTH,
                                     PROTOVER_LINKAUTH_ED25519_HANDSHAKE);
-  out->supports_ed25519_link_handshake_any =
-    protocol_list_supports_protocol_or_later(
-                                     protocols,
-                                     PRT_LINKAUTH,
-                                     PROTOVER_LINKAUTH_ED25519_HANDSHAKE);
 
   out->supports_extend2_cells =
     protocol_list_supports_protocol(protocols, PRT_RELAY,
