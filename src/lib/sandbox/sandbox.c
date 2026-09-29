@@ -241,7 +241,6 @@ static int filter_nopar_gen[] = {
     /* XXXX restrict this in the same ways as mmap2 */
     SCMP_SYS(mmap),
 #endif
-    SCMP_SYS(munmap),
 #ifdef __NR_nanosleep
     SCMP_SYS(nanosleep),
 #endif
@@ -1778,6 +1777,30 @@ prot_strings(scmp_filter_ctx ctx, sandbox_cfg_t* cfg)
         SCMP_CMP(0, SCMP_CMP_EQ, (intptr_t) pr_mem_base));
   if (ret) {
     log_err(LD_BUG,"(Sandbox) munmap protected memory filter fail!");
+    goto out;
+  }
+
+  /* NE fails with errno 524 on Linux 6.8.0-11-generic. With some help of a
+   * LLM, this seems to be a BPF JIT layout issue. Use the disjoint LT/GT rules
+   * appears to fix the issue.
+   *
+   * Here is the explanation after several standalone tests were done on the
+   * kernel version from above: The NE-generated filter puts two machine-code
+   * jumps near the short-jump size limit so resizing one changes the other’s
+   * distance and they repeatedly switch between short and long encodings. It
+   * seems that the the kernel JIT then fails its padding check. Using </>
+   * changes the layout enough to avoid that failure. */
+  ret = seccomp_rule_add_1(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap),
+      SCMP_CMP(0, SCMP_CMP_LT, (intptr_t) pr_mem_base));
+  if (ret) {
+    log_err(LD_BUG,"(Sandbox) munmap ALLOW non base address fail (LT)!");
+    goto out;
+  }
+
+  ret = seccomp_rule_add_1(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap),
+      SCMP_CMP(0, SCMP_CMP_GT, (intptr_t) pr_mem_base));
+  if (ret) {
+    log_err(LD_BUG,"(Sandbox) munmap ALLOW non base address fail (GT)!");
     goto out;
   }
 
