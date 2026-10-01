@@ -49,6 +49,7 @@ compute_introduce_mac(const uint8_t *encoded_cell, size_t encoded_cell_len,
   tor_assert(mac_key);
   tor_assert(mac_out);
   tor_assert(mac_out_len >= DIGEST256_LEN);
+  tor_assert(encrypted_len >= DIGEST256_LEN);
 
   /* Compute the size of the message which is basically the entire cell until
    * the MAC field of course. */
@@ -897,6 +898,9 @@ get_introduce2_keys_and_verify_mac(hs_cell_introduce2_data_t *data,
   if (BUG(encrypted_section_len < DIGEST256_LEN)) {
     return NULL;
   }
+  if (BUG(data->payload_len < encrypted_section_len)) {
+    return NULL;
+  }
 
   /* Validate MAC from the cell and our computed key material. The MAC field
    * in the cell is at the end of the encrypted section. */
@@ -906,6 +910,7 @@ get_introduce2_keys_and_verify_mac(hs_cell_introduce2_data_t *data,
 
     /* The MAC field is at the very end of the ENCRYPTED section. */
     size_t mac_offset = encrypted_section_len - sizeof(mac);
+
     /* Compute the MAC. Use the entire encoded payload with a length up to the
      * ENCRYPTED section. */
     compute_introduce_mac(data->payload,
@@ -1060,6 +1065,10 @@ hs_cell_parse_introduce2(hs_cell_introduce2_data_t *data,
     /* It's symmetric encryption so it's correct to use the ENCRYPTED length
      * for decryption. Computes the length of ENCRYPTED_DATA meaning removing
      * the CLIENT_PK and MAC length. */
+    if (BUG(encrypted_section_len <
+            (sizeof(data->rdv_data.client_pk) + DIGEST256_LEN))) {
+      goto done;
+    }
     size_t encrypted_data_len =
       encrypted_section_len -
       (sizeof(data->rdv_data.client_pk) + DIGEST256_LEN);
