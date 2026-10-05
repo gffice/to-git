@@ -68,7 +68,8 @@ relay_msg_t *
 relay_msg_copy(const relay_msg_t *msg)
 {
   tor_assert(msg->length <= RELAY_PAYLOAD_SIZE_MAX);
-  void *alloc = tor_malloc_zero(sizeof(relay_msg_t) + msg->length);
+  void *alloc = tor_malloc_zero(sizeof(relay_msg_t) + msg->length +
+                                RELAY_MSG_COPY_OVERHEAD);
   relay_msg_t *new_msg = alloc;
   uint8_t *body = ((uint8_t*)alloc) + sizeof(relay_msg_t);
 
