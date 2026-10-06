@@ -1647,11 +1647,12 @@ test_conflux_ooo_q_teardown_accounting(void *arg)
   make_test_relay_msg(&msg, RELAY_COMMAND_DATA, &body, sizeof(body), 42);
   tt_int_op(conflux_process_relay_msg(cfx, exit1, NULL, &msg), OP_EQ, 0);
   tt_int_op(conflux_process_relay_msg(cfx, exit1, NULL, &msg), OP_EQ, 0);
+  const size_t overhead = RELAY_MSG_COPY_OVERHEAD;
 
   tt_int_op(smartlist_len(cfx->ooo_q), OP_EQ, 2);
   /* Same as conflux_msg_alloc_cost() but we have a relay_msg_t. */
   tt_u64_op(conflux_get_total_bytes_allocation(), OP_EQ,
-            2 * (msg.length + sizeof(msg) + sizeof(conflux_msg_t)));
+            2 * (msg.length + sizeof(msg) + sizeof(conflux_msg_t) + overhead));
 
   /* test_clear_circs() frees all legs and should free the conflux object.
    * Accounting must go back to zero even if OOO queue is non-empty. */
