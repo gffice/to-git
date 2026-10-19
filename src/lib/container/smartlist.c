@@ -811,6 +811,11 @@ smartlist_pqueue_remove(smartlist_t *sl,
     sl->list[idx] = sl->list[sl->num_used];
     sl->list[sl->num_used] = NULL;
     UPDATE_IDX(idx);
+    if (smartlist_heapify_up(sl, compare, idx_field_offset, idx)) {
+      // If we bubbled the element upwards, then we do not need
+      // to consider the downward direction.
+      return;
+    }
     smartlist_heapify(sl, compare, idx_field_offset, idx);
   }
 }
