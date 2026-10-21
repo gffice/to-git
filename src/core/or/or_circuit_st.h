@@ -76,11 +76,6 @@ struct or_circuit_t {
    * closing its stream must not clear this flag. */
   unsigned int already_received_hsdir_request : 1;
 
-  /** A BEGIN_DIR has used this circuit's lifetime allowance. Only set when
-   * the previous hop authenticated; closing its stream must not clear this
-   * flag. */
-  unsigned int already_received_begindir : 1;
-
   /** If set, this circuit carries HS traffic. Consider it in any HS
    *  statistics. */
   unsigned int circuit_carries_hs_traffic_stats : 1;

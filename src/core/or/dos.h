@@ -91,7 +91,6 @@ uint64_t dos_get_num_conn_addr_rejected(void);
 uint64_t dos_get_num_conn_addr_connect_rejected(void);
 uint64_t dos_get_num_single_hop_refused(void);
 uint64_t dos_get_num_stream_rejected(void);
-uint64_t dos_get_num_begindir_rejected(void);
 
 /*
  * Circuit creation DoS mitigation subsystemn interface.
@@ -192,15 +191,6 @@ dos_stream_defense_type_t dos_stream_new_begin_or_resolve_cell(
                                                           or_circuit_t *circ);
 void dos_stream_init_circ_tbf(or_circuit_t *circ);
 
-/*
- * BEGIN_DIR limit DoS mitigation subsystem interface.
- */
-
-/* DoSBeginDirLimitEnabled default. Disabled by default. */
-#define DOS_BEGINDIR_LIMIT_ENABLED_DEFAULT 0
-
-bool dos_begindir_should_refuse(or_circuit_t *circ);
-
 #ifdef DOS_PRIVATE
 
 STATIC uint32_t get_param_conn_max_concurrent_count(
@@ -219,8 +209,6 @@ MOCK_DECL(STATIC unsigned int, get_param_cc_enabled,
 MOCK_DECL(STATIC unsigned int, get_param_conn_enabled,
           (const networkstatus_t *ns));
 MOCK_DECL(STATIC unsigned int, get_param_stream_enabled,
-          (const networkstatus_t *ns));
-MOCK_DECL(STATIC unsigned int, get_param_begindir_limit_enabled,
           (const networkstatus_t *ns));
 
 #endif /* defined(DOS_PRIVATE) */
