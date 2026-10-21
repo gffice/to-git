@@ -3161,6 +3161,14 @@ The following options are useful only for a exit relay.
     not defined or set to 0, it is controlled by a consensus parameter. If not
     defined in the consensus, the value is 300. (Default: 0)
 
+[[DoSBeginDirLimitEnabled]] **DoSBeginDirLimitEnabled** **0**|**1**|**auto**::
+
+    Enable the BEGIN_DIR DoS mitigation. If set to 1 (enabled), tor will
+    refuse any BEGIN_DIR after the first one on a circuit whose previous hop
+    is an authenticated relay. Circuits from clients and bridges are not
+    limited. "auto" means use the consensus parameter. If not defined in the
+    consensus, the value is 0. (Default: auto)
+
 
 For onion services, mitigations are a work in progress and multiple options
 are currently available.

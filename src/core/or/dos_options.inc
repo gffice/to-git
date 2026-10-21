@@ -63,6 +63,10 @@ CONF_VAR(DoSStreamCreationBurst, POSINT, 0, "0")
  * against it. See the dos_stream_defense_type_t enum. */
 CONF_VAR(DoSStreamCreationDefenseType, INT, 0, "0")
 
+/** Autobool: Do we refuse a second BEGIN_DIR on a circuit from an
+ * authenticated relay? */
+CONF_VAR(DoSBeginDirLimitEnabled, AUTOBOOL, 0, "auto")
+
 /** For how much time (in seconds) the connection connect rate defense is
 * applicable for a malicious address. A random time delta is added to the
 * defense time of an address which will be between 1 second and half of this
