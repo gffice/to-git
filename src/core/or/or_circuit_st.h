@@ -71,11 +71,6 @@ struct or_circuit_t {
   /* We have already received an INTRODUCE1 cell on this circuit. */
   unsigned int already_received_introduce1 : 1;
 
-  /** An HSDir fetch or upload has used this circuit's lifetime allowance.
-   * Set after checking the incoming channel and identifying the HTTP request;
-   * closing its stream must not clear this flag. */
-  unsigned int already_received_hsdir_request : 1;
-
   /** If set, this circuit carries HS traffic. Consider it in any HS
    *  statistics. */
   unsigned int circuit_carries_hs_traffic_stats : 1;
