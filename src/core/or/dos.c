@@ -27,6 +27,7 @@
 #include "core/or/dos_sys.h"
 
 #include "core/or/dos_options_st.h"
+#include "core/or/or_circuit_st.h"
 #include "core/or/or_connection_st.h"
 
 /*
@@ -95,6 +96,18 @@ static uint32_t dos_stream_burst = DOS_STREAM_BURST_DEFAULT;
 
 /* Keep some stats for the heartbeat so we can report out. */
 static uint64_t stream_num_rejected;
+
+/*
+ * BEGIN_DIR limit denial of service mitigation.
+ *
+ * Namespace used for this mitigation framework is "dos_begindir_".
+ */
+
+/* Is the one BEGIN_DIR per circuit limit enabled? */
+static unsigned int dos_begindir_enabled = 0;
+
+/* Keep some stats for the heartbeat so we can report out. */
+static uint64_t begindir_num_rejected;
 
 /*
  * General interface of the denial of service mitigation subsystem.
@@ -289,6 +302,16 @@ get_param_stream_enabled, (const networkstatus_t *ns))
                                    DOS_STREAM_ENABLED_DEFAULT, 0, 1);
 }
 
+/* Return true iff the BEGIN_DIR limit is enabled. We look at the consensus
+ * for this else a default value is returned. There is deliberately no torrc
+ * option: only the directory authorities decide this. */
+MOCK_IMPL(STATIC unsigned int,
+get_param_begindir_limit_enabled, (const networkstatus_t *ns))
+{
+  return !!networkstatus_get_param(ns, "DoSBeginDirLimitEnabled",
+                                   DOS_BEGINDIR_LIMIT_ENABLED_DEFAULT, 0, 1);
+}
+
 /* Return the parameter for the time rate that is how many stream per circuit
  * over this time span. */
 static uint32_t
@@ -360,6 +383,9 @@ set_dos_parameters(const networkstatus_t *ns)
   dos_stream_defense_type = get_param_stream_defense_type(ns);
   dos_stream_rate = get_param_stream_rate(ns);
   dos_stream_burst = get_param_stream_burst(ns);
+
+  /* BEGIN_DIR. */
+  dos_begindir_enabled = get_param_begindir_limit_enabled(ns);
 }
 
 /* Free everything for the circuit creation DoS mitigation subsystem. */
@@ -879,6 +905,42 @@ dos_stream_init_circ_tbf(or_circuit_t *circ)
                         (uint32_t) monotime_coarse_absolute_sec());
 }
 
+/* BEGIN_DIR limit public API. */
+
+/** Return the number of rejected BEGIN_DIR. */
+uint64_t
+dos_get_num_begindir_rejected(void)
+{
+  return begindir_num_rejected;
+}
+
+/** Return true iff we should refuse a BEGIN_DIR cell on <b>circ</b>.
+ *
+ * The first BEGIN_DIR from an authenticated previous hop uses the circuit's
+ * lifetime allowance, even while the limit is disabled, so circuits opened
+ * before the parameter flipped are handled correctly. Every later one is
+ * refused when the limit is enabled. */
+bool
+dos_begindir_should_refuse(or_circuit_t *circ)
+{
+  if (circ == NULL || circ->p_chan == NULL) {
+    return false;
+  }
+  /* Clients and bridges reuse one-hop directory circuits by design. */
+  if (channel_is_client(circ->p_chan)) {
+    return false;
+  }
+  if (!circ->already_received_begindir) {
+    circ->already_received_begindir = 1;
+    return false;
+  }
+  if (!dos_begindir_enabled) {
+    return false;
+  }
+  ++begindir_num_rejected;
+  return true;
+}
+
 /* General API */
 
 /* Take any appropriate actions for the given geoip entry that is about to get
@@ -1070,6 +1132,14 @@ dos_log_heartbeat(void)
                            stream_num_rejected);
   } else {
     smartlist_add_asprintf(elems, "[DoSStreamCreationEnabled disabled]");
+  }
+
+  if (dos_begindir_enabled) {
+    smartlist_add_asprintf(elems,
+                           "%" PRIu64 " BEGIN_DIR rejected",
+                           dos_get_num_begindir_rejected());
+  } else {
+    smartlist_add_asprintf(elems, "[DoSBeginDirLimitEnabled disabled]");
   }
 
   /* HS DoS stats. */

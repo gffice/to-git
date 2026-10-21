@@ -4245,6 +4245,14 @@ connection_exit_begin_conn(const relay_msg_t *msg, circuit_t *circ)
                                     layer_hint);
       return 0;
     }
+    if (dos_begindir_should_refuse(or_circ)) {
+      /* Relays isolate every directory request on its own circuit, so only
+       * refuse the stream. Avoid END_STREAM_REASON_RESOURCELIMIT so we
+       * aren't marked as non-functional. */
+      relay_send_end_cell_from_edge(msg->stream_id, circ,
+                                    END_STREAM_REASON_MISC, layer_hint);
+      return 0;
+    }
     /* Make sure to get the 'real' address of the previous hop: the
      * caller might want to know whether the remote IP address has changed,
      * and we might already have corrected base_.addr[ess] for the relay's
@@ -4335,8 +4343,8 @@ connection_exit_begin_conn(const relay_msg_t *msg, circuit_t *circ)
 
   log_debug(LD_EXIT,"about to start the dns_resolve().");
 
-  // in the future we may want to have a similar defense for BEGIN_DIR and
-  // BEGIN sent to OS.
+  // BEGIN_DIR has its own per circuit limit above. In the future we may want
+  // to have a similar defense for BEGIN sent to OS.
   dos_defense_type = dos_stream_new_begin_or_resolve_cell(or_circ);
   switch (dos_defense_type) {
     case DOS_STREAM_DEFENSE_NONE:
