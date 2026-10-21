@@ -715,12 +715,12 @@ dir_split_resource_into_fingerprints(const char *resource,
   if (decode_hex || decode_base64) {
     const size_t encoded_len = decode_hex ? hex_digest_len : base64_digest_len;
     int i, n_valid = 0;
+    int n_bad_length = 0, n_bad_encoding = 0;
     char *cp, *d = NULL;
     for (i = 0; i < smartlist_len(fp_tmp); ++i) {
       cp = smartlist_get(fp_tmp, i);
       if (strlen(cp) != encoded_len) {
-        log_info(LD_DIR,
-                 "Skipping digest %s with non-standard length.", escaped(cp));
+        ++n_bad_length;
         goto again;
       }
       d = tor_malloc_zero(digest_len);
@@ -728,7 +728,7 @@ dir_split_resource_into_fingerprints(const char *resource,
           (base16_decode(d, digest_len, cp, hex_digest_len) != digest_len) :
           (base64_decode(d, digest_len, cp, base64_digest_len)
                          != digest_len)) {
-          log_info(LD_DIR, "Skipping non-decodable digest %s", escaped(cp));
+          ++n_bad_encoding;
           goto again;
       }
       smartlist_set(fp_tmp, n_valid++, d);
@@ -742,6 +742,10 @@ dir_split_resource_into_fingerprints(const char *resource,
      * been freed or moved into the valid prefix. */
     while (smartlist_len(fp_tmp) > n_valid)
       smartlist_del(fp_tmp, smartlist_len(fp_tmp) - 1);
+    if (n_bad_length || n_bad_encoding) {
+      log_info(LD_DIR, "Skipping %d digests with non-standard length and "
+               "%d non-decodable digests.", n_bad_length, n_bad_encoding);
+    }
   }
   if (sort_uniq) {
     if (decode_hex || decode_base64) {

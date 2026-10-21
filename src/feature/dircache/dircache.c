@@ -552,29 +552,23 @@ warn_consensus_is_not_reasonably_live(
 
 /**
  * Parse a single hex-encoded sha3-256 digest from <b>hex</b> into
- * <b>digest</b>. Return 0 on success.  On failure, report that the hash came
- * from <b>location</b>, report that we are taking <b>action</b> with it, and
- * return -1.
+ * <b>digest</b>. Return 0 on success and -1 on failure.
  */
 static int
-parse_one_diff_hash(uint8_t *digest, const char *hex, const char *location,
-                    const char *action)
+parse_one_diff_hash(uint8_t *digest, const char *hex)
 {
   if (base16_decode((char*)digest, DIGEST256_LEN, hex, strlen(hex)) ==
       DIGEST256_LEN) {
     return 0;
   } else {
-    log_fn(LOG_PROTOCOL_WARN, LD_DIR,
-           "%s contained bogus digest %s; %s.",
-           location, escaped(hex), action);
     return -1;
   }
 }
 
 /** If there is an X-Or-Diff-From-Consensus header included in <b>headers</b>,
- * set <b>digest_out</b> to a new smartlist containing every 256-bit
- * hex-encoded digest listed in that header and return 0.  Otherwise return
- * -1.  */
+ * set <b>digests_out</b> to a new smartlist containing every valid 256-bit
+ * digest listed in that header, decoded, and return 0. Report invalid entries
+ * in one summary. If the header is absent, return -1. */
 static int
 parse_or_diff_from_header(smartlist_t **digests_out, const char *headers)
 {
@@ -588,11 +582,17 @@ parse_or_diff_from_header(smartlist_t **digests_out, const char *headers)
                          SPLIT_SKIP_SPACE|SPLIT_IGNORE_BLANK, -1);
   SMARTLIST_FOREACH_BEGIN(hex_digests, const char *, hex) {
     uint8_t digest[DIGEST256_LEN];
-    if (!parse_one_diff_hash(digest, hex, "X-Or-Diff-From-Consensus header",
-                             "ignoring")) {
+    if (!parse_one_diff_hash(digest, hex)) {
       smartlist_add(*digests_out, tor_memdup(digest, sizeof(digest)));
     }
   } SMARTLIST_FOREACH_END(hex);
+  const int n_invalid =
+    smartlist_len(hex_digests) - smartlist_len(*digests_out);
+  if (n_invalid) {
+    log_fn(LOG_PROTOCOL_WARN, LD_DIR,
+           "X-Or-Diff-From-Consensus header contained %d invalid digests; "
+           "ignoring them.", n_invalid);
+  }
   SMARTLIST_FOREACH(hex_digests, char *, cp, tor_free(cp));
   smartlist_free(hex_digests);
   tor_free(hdr);
@@ -832,13 +832,14 @@ parse_consensus_request(parsed_consensus_request_t *out,
     uint8_t diff_from[DIGEST256_LEN];
     out->diff_from_digests = smartlist_new();
     out->diff_only = 1;
-    int ok = !parse_one_diff_hash(diff_from, diff_hash_in_url, "URL",
-                                  "rejecting");
+    int ok = !parse_one_diff_hash(diff_from, diff_hash_in_url);
     tor_free(diff_hash_in_url);
     if (ok) {
       smartlist_add(out->diff_from_digests,
                     tor_memdup(diff_from, DIGEST256_LEN));
     } else {
+      log_fn(LOG_PROTOCOL_WARN, LD_DIR,
+             "URL contained an invalid consensus diff digest; rejecting.");
       return -1;
     }
   } else {
