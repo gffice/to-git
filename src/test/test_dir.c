@@ -5456,6 +5456,35 @@ test_dir_should_use_directory_guards(void *data)
     tor_free(errmsg);
 }
 
+static void
+test_dir_tunnel_isolation_flags(void *data)
+{
+  or_options_t *options = NULL;
+  (void)data;
+
+  options = options_new();
+  options_init(options);
+
+  /* Client: one-hop requests share circuits, anonymized ones don't. */
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 0), OP_EQ,
+            ISO_SESSIONGRP);
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 1), OP_EQ, ISO_STREAM);
+
+  /* Relay: every request gets its own circuit. */
+  options->ORPort_set = 1;
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 0), OP_EQ, ISO_STREAM);
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 1), OP_EQ, ISO_STREAM);
+
+  /* Bridge: same as a client. */
+  options->BridgeRelay = 1;
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 0), OP_EQ,
+            ISO_SESSIONGRP);
+  tt_int_op(dirclient_tunnel_isolation_flags(options, 1), OP_EQ, ISO_STREAM);
+
+ done:
+  or_options_free(options);
+}
+
 static void dir_tests_directory_initiate_request(directory_request_t *req);
 ATTR_UNUSED static int dir_tests_directory_initiate_request_called = 0;
 
@@ -7482,6 +7511,7 @@ struct testcase_t dir_tests[] = {
   DIR(authdir_type_to_string, 0),
   DIR(conn_purpose_to_string, 0),
   DIR(should_use_directory_guards, 0),
+  DIR(tunnel_isolation_flags, 0),
   DIR(should_not_init_request_to_ourselves, TT_FORK),
   DIR(should_not_init_request_to_dir_auths_without_v3_info, 0),
   DIR(should_init_request_to_dir_auths, 0),
