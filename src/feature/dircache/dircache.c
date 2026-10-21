@@ -15,6 +15,8 @@
 #include "app/config/config.h"
 #include "app/config/resolve_addr.h"
 #include "core/mainloop/connection.h"
+#include "core/or/circuitlist.h"
+#include "core/or/connection_edge.h"
 #include "core/or/relay.h"
 #include "feature/dirauth/dirvote.h"
 #include "feature/dirauth/authmode.h"
@@ -37,6 +39,8 @@
 #include "lib/compress/compress.h"
 #include "lib/crypt_ops/crypto_format.h"
 
+#include "core/or/edge_connection_st.h"
+#include "core/or/or_circuit_st.h"
 #include "feature/dircache/cached_dir_st.h"
 #include "feature/dircommon/dir_connection_st.h"
 #include "feature/nodelist/authority_cert_st.h"
@@ -1348,6 +1352,34 @@ handle_get_keys(dir_connection_t *conn, const get_handler_args_t *args)
   return 0;
 }
 
+/** Admit at most one HSDir request per circuit, shared between fetches and
+ * uploads. The caller must have checked connection_dir_is_anonymous(), so the
+ * linked edge connection is on an OR circuit with an authenticated previous
+ * channel. This does not prove that the circuit has multiple hops.
+ *
+ * Anonymous directory requests use stream isolation. Count even requests for
+ * missing descriptors or invalid uploads, before lookup or validation. Other
+ * directory requests do not consume this allowance. We cannot enforce this
+ * at BEGIN_DIR time since the HTTP request type is not known yet.
+ *
+ * Return true if admitted, or write a rejection response and return false.
+ */
+static bool
+hsdir_request_is_first_on_circuit(dir_connection_t *conn)
+{
+  tor_assert(connection_dir_is_anonymous(conn));
+  edge_connection_t *edge_conn = TO_EDGE_CONN(TO_CONN(conn)->linked_conn);
+  or_circuit_t *circ = TO_OR_CIRCUIT(edge_conn->on_circuit);
+
+  if (circ->already_received_hsdir_request) {
+    write_short_http_response(conn, 503,
+                              "Only one HSDir request allowed per circuit");
+    return false;
+  }
+  circ->already_received_hsdir_request = 1;
+  return true;
+}
+
 /** Helper function for GET `/tor/hs/3/...`. Only for version 3.
  */
 STATIC int
@@ -1364,6 +1396,9 @@ handle_get_hs_descriptor_v3(dir_connection_t *conn,
   if (!connection_dir_is_anonymous(conn)) {
     write_short_http_response(conn, 503,
                               "Rejecting single hop HS v3 descriptor request");
+    goto done;
+  }
+  if (!hsdir_request_is_first_on_circuit(conn)) {
     goto done;
   }
 
@@ -1609,6 +1644,9 @@ directory_handle_command_post,(dir_connection_t *conn, const char *headers,
     if (!connection_dir_is_anonymous(conn)) {
       write_short_http_response(conn, 503,
                                 "Rejecting single hop HS descriptor post");
+      goto done;
+    }
+    if (!hsdir_request_is_first_on_circuit(conn)) {
       goto done;
     }
     const char *msg = "HS descriptor stored successfully.";
