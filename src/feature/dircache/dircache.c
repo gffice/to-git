@@ -15,6 +15,8 @@
 #include "app/config/config.h"
 #include "app/config/resolve_addr.h"
 #include "core/mainloop/connection.h"
+#include "core/or/circuitlist.h"
+#include "core/or/connection_edge.h"
 #include "core/or/relay.h"
 #include "feature/dirauth/dirvote.h"
 #include "feature/dirauth/authmode.h"
@@ -37,6 +39,8 @@
 #include "lib/compress/compress.h"
 #include "lib/crypt_ops/crypto_format.h"
 
+#include "core/or/edge_connection_st.h"
+#include "core/or/or_circuit_st.h"
 #include "feature/dircache/cached_dir_st.h"
 #include "feature/dircommon/dir_connection_st.h"
 #include "feature/nodelist/authority_cert_st.h"
@@ -1348,6 +1352,45 @@ handle_get_keys(dir_connection_t *conn, const get_handler_args_t *args)
   return 0;
 }
 
+/** Return true iff an HSDir request (descriptor fetch or upload) is allowed
+ * on the circuit of <b>conn</b>, and use up the circuit's allowance.
+ *
+ * A circuit gets one HSDir request over its lifetime, shared between fetches
+ * and uploads. It is used up before lookup or validation, so requests for
+ * missing descriptors and invalid uploads count too. Other directory requests
+ * don't use it. This can't be enforced at BEGIN_DIR time because the HTTP
+ * request type isn't known yet.
+ *
+ * The caller must have checked connection_dir_is_anonymous(), so the linked
+ * edge connection is on an OR circuit whose previous hop authenticated. That
+ * doesn't prove the circuit has multiple hops.
+ *
+ * Tor never sends a second HSDir request on a circuit since each one is
+ * stream isolated. When one shows up, we close the circuit so the sender has
+ * to build a new one for every request. We don't send a response: the
+ * sender is misbehaving and the circuit is going away. */
+static bool
+hsdir_request_allowed_on_circuit(dir_connection_t *conn)
+{
+  edge_connection_t *edge_conn = NULL;
+  or_circuit_t *circ = NULL;
+
+  if (BUG(!connection_dir_is_anonymous(conn))) {
+    write_short_http_response(conn, 503,
+                              "Rejecting single hop HSDir request");
+    return false;
+  }
+  edge_conn = TO_EDGE_CONN(TO_CONN(conn)->linked_conn);
+  circ = TO_OR_CIRCUIT(edge_conn->on_circuit);
+
+  if (circ->already_received_hsdir_request) {
+    circuit_mark_for_close(TO_CIRCUIT(circ), END_CIRC_REASON_TORPROTOCOL);
+    return false;
+  }
+  circ->already_received_hsdir_request = 1;
+  return true;
+}
+
 /** Helper function for GET `/tor/hs/3/...`. Only for version 3.
  */
 STATIC int
@@ -1364,6 +1407,9 @@ handle_get_hs_descriptor_v3(dir_connection_t *conn,
   if (!connection_dir_is_anonymous(conn)) {
     write_short_http_response(conn, 503,
                               "Rejecting single hop HS v3 descriptor request");
+    goto done;
+  }
+  if (!hsdir_request_allowed_on_circuit(conn)) {
     goto done;
   }
 
@@ -1609,6 +1655,9 @@ directory_handle_command_post,(dir_connection_t *conn, const char *headers,
     if (!connection_dir_is_anonymous(conn)) {
       write_short_http_response(conn, 503,
                                 "Rejecting single hop HS descriptor post");
+      goto done;
+    }
+    if (!hsdir_request_allowed_on_circuit(conn)) {
       goto done;
     }
     const char *msg = "HS descriptor stored successfully.";
