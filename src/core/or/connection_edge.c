@@ -4245,6 +4245,20 @@ connection_exit_begin_conn(const relay_msg_t *msg, circuit_t *circ)
                                     layer_hint);
       return 0;
     }
+    /* Rate limit first so that a peer flooding BEGIN_DIR that the lifetime
+     * limit below refuses still hits the stronger rate defense. */
+    switch (dos_begindir_new_request(or_circ)) {
+      case DOS_STREAM_DEFENSE_NONE:
+        break;
+      case DOS_STREAM_DEFENSE_REFUSE_STREAM:
+        /* Same as BEGIN: avoid END_STREAM_REASON_RESOURCELIMIT so clients
+         * don't mark us as non-functional. */
+        relay_send_end_cell_from_edge(msg->stream_id, circ,
+                                      END_STREAM_REASON_MISC, layer_hint);
+        return 0;
+      case DOS_STREAM_DEFENSE_CLOSE_CIRCUIT:
+        return -END_CIRC_REASON_RESOURCELIMIT;
+    }
     if (dos_begindir_should_refuse(or_circ)) {
       /* Relays isolate every directory request on its own circuit, so only
        * refuse the stream. Avoid END_STREAM_REASON_RESOURCELIMIT so we
@@ -4345,7 +4359,7 @@ connection_exit_begin_conn(const relay_msg_t *msg, circuit_t *circ)
 
   // BEGIN_DIR has its own per circuit limit above. In the future we may want
   // to have a similar defense for BEGIN sent to OS.
-  dos_defense_type = dos_stream_new_begin_or_resolve_cell(or_circ);
+  dos_defense_type = dos_stream_new_request(or_circ);
   switch (dos_defense_type) {
     case DOS_STREAM_DEFENSE_NONE:
       break;
@@ -4415,7 +4429,7 @@ connection_exit_begin_resolve(const relay_msg_t *msg, or_circuit_t *circ)
 
   dummy_conn->on_circuit = TO_CIRCUIT(circ);
 
-  dos_defense_type = dos_stream_new_begin_or_resolve_cell(circ);
+  dos_defense_type = dos_stream_new_request(circ);
   switch (dos_defense_type) {
     case DOS_STREAM_DEFENSE_NONE:
       break;

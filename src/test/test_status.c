@@ -367,6 +367,7 @@ test_status_hb_not_in_consensus(void *arg)
                  "[DoSRefuseSingleHopClientRendezvous disabled], "
                  "[DoSStreamCreationEnabled disabled], "
                  "[DoSBeginDirLimitEnabled disabled], "
+                 "[DoSBeginDirRateEnabled disabled], "
                  "0 INTRODUCE2 rejected.\n");
   tt_int_op(mock_saved_log_n_entries(), OP_EQ, 6);
 

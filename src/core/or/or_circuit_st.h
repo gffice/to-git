@@ -122,6 +122,11 @@ struct or_circuit_t {
    * this circuit. Only used if this is the end of a circuit on an exit node.*/
   token_bucket_ctr_t stream_limiter;
 
+  /** RELAY_BEGIN_DIR cell bucket controlling how much can go on this
+   * circuit. Only used if this is the end of a circuit on a directory
+   * cache. */
+  token_bucket_ctr_t begindir_limiter;
+
   /** Format to use when exchanging relay cells with the client
    * who built this circuit. */
   relay_cell_fmt_t relay_cell_format;
