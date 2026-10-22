@@ -414,6 +414,19 @@ get_param_stream_defense_type(const networkstatus_t *ns)
                                  DOS_STREAM_DEFENSE_MAX);
 }
 
+/* Set the BEGIN_DIR parameters located in the consensus or their default if
+ * none are present. Unlike the rest of the subsystem, they also apply to
+ * bridges since they serve directory requests. */
+static void
+set_dos_begindir_parameters(const networkstatus_t *ns)
+{
+  dos_begindir_enabled = get_param_begindir_limit_enabled(ns);
+  dos_begindir_rate_enabled = get_param_begindir_rate_enabled(ns);
+  dos_begindir_defense_type = get_param_begindir_defense_type(ns);
+  dos_begindir_rate = get_param_begindir_rate(ns);
+  dos_begindir_burst = get_param_begindir_burst(ns);
+}
+
 /* Set circuit creation parameters located in the consensus or their default
  * if none are present. Called at initialization or when the consensus
  * changes. */
@@ -447,11 +460,7 @@ set_dos_parameters(const networkstatus_t *ns)
   dos_stream_burst = get_param_stream_burst(ns);
 
   /* BEGIN_DIR. */
-  dos_begindir_enabled = get_param_begindir_limit_enabled(ns);
-  dos_begindir_rate_enabled = get_param_begindir_rate_enabled(ns);
-  dos_begindir_defense_type = get_param_begindir_defense_type(ns);
-  dos_begindir_rate = get_param_begindir_rate(ns);
-  dos_begindir_burst = get_param_begindir_burst(ns);
+  set_dos_begindir_parameters(ns);
 }
 
 /* Free everything for the circuit creation DoS mitigation subsystem. */
@@ -1350,8 +1359,11 @@ dos_consensus_has_changed(const networkstatus_t *ns)
   /* There are two ways to configure this subsystem, one at startup through
    * dos_init() which is called when the options are parsed. And this one
    * through the consensus. We don't want to enable any DoS mitigation if we
-   * aren't a public relay. */
+   * aren't a public relay, except the BEGIN_DIR limits for bridges. */
   if (!public_server_mode(get_options())) {
+    if (server_mode(get_options())) {
+      set_dos_begindir_parameters(ns);
+    }
     return;
   }
 
@@ -1389,4 +1401,12 @@ dos_init(void)
 {
   /* To initialize, we only need to get the parameters. */
   set_dos_parameters(NULL);
+}
+
+/* Initialize the Denial of Service subsystem for a bridge. Bridges serve
+ * directory requests, so only the BEGIN_DIR limits apply to them. */
+void
+dos_bridge_init(void)
+{
+  set_dos_begindir_parameters(NULL);
 }

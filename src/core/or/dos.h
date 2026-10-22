@@ -69,6 +69,7 @@ typedef struct dos_client_stats_t {
 struct clientmap_entry_t;
 
 void dos_init(void);
+void dos_bridge_init(void);
 void dos_free_all(void);
 void dos_consensus_has_changed(const networkstatus_t *ns);
 int dos_enabled(void);
