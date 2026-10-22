@@ -192,6 +192,7 @@ EXTRA_DIST+= \
 	CODE_OF_CONDUCT							\
 	INSTALL								\
 	LICENSE								\
+	LICENSES/third-party.txt						\
 	README.md								\
 	ReleaseNotes							\
 	scripts/build/combine_libs					\
@@ -576,7 +577,8 @@ check-typos:
 			$(top_srcdir)/ChangeLog \
 			$(top_srcdir)/INSTALL \
 			$(top_srcdir)/ReleaseNotes \
-			$(top_srcdir)/LICENSE); \
+			$(top_srcdir)/LICENSE \
+			$(top_srcdir)/LICENSES); \
 	else \
 		echo "Tor can use misspell to check for typos."; \
 		echo "It seems that you don't have misspell installed."; \
