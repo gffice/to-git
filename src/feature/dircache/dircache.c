@@ -17,6 +17,7 @@
 #include "core/mainloop/connection.h"
 #include "core/or/circuitlist.h"
 #include "core/or/connection_edge.h"
+#include "core/or/dos.h"
 #include "core/or/relay.h"
 #include "feature/dirauth/dirvote.h"
 #include "feature/dirauth/authmode.h"
@@ -1353,6 +1354,32 @@ handle_get_keys(dir_connection_t *conn, const get_handler_args_t *args)
   return 0;
 }
 
+/** Return true iff a directory connection is closing or has lost its circuit.
+ * Direct DirPort connections still need the usual non-anonymous rejection. */
+static bool
+dir_conn_is_closing(const dir_connection_t *conn)
+{
+  const connection_t *base = TO_CONN(conn);
+  const connection_t *linked = base->linked_conn;
+  const circuit_t *circ = NULL;
+
+  /* The directory connection itself is already closing. */
+  if (base->marked_for_close) {
+    return true;
+  }
+  /* Direct DirPort connections have no linked stream to check. */
+  if (!base->linked) {
+    return false;
+  }
+  /* A linked directory connection needs a live edge connection. */
+  if (!linked || base->linked_conn_is_closed || linked->marked_for_close ||
+      !CONN_IS_EDGE(linked)) {
+    return true;
+  }
+  circ = CONST_TO_EDGE_CONN(linked)->on_circuit;
+  return !circ || circ->marked_for_close;
+}
+
 /** Return true iff an HSDir request (descriptor fetch or upload) is allowed
  * on the circuit of <b>conn</b>, and use up the circuit's allowance.
  *
@@ -1385,6 +1412,7 @@ hsdir_request_allowed_on_circuit(dir_connection_t *conn)
   circ = TO_OR_CIRCUIT(edge_conn->on_circuit);
 
   if (circ->already_received_hsdir_request) {
+    dos_note_begindir_hsdir_rejected();
     circuit_mark_for_close(TO_CIRCUIT(circ), END_CIRC_REASON_TORPROTOCOL);
     return false;
   }
@@ -1402,6 +1430,10 @@ handle_get_hs_descriptor_v3(dir_connection_t *conn,
   const char *desc_str = NULL;
   const char *pubkey_str = NULL;
   const char *url = args->url;
+
+  if (dir_conn_is_closing(conn)) {
+    goto done;
+  }
 
   /* Reject non anonymous dir connections (which also tests if encrypted). We
    * do not allow single hop clients to query an HSDir. */
@@ -1653,6 +1685,9 @@ directory_handle_command_post,(dir_connection_t *conn, const char *headers,
    * (which also tests for encrypted). We do not allow single-hop client to
    * post a descriptor onto an HSDir. */
   if (!strcmpstart(url, "/tor/hs/")) {
+    if (dir_conn_is_closing(conn)) {
+      goto done;
+    }
     if (!connection_dir_is_anonymous(conn)) {
       write_short_http_response(conn, 503,
                                 "Rejecting single hop HS descriptor post");
@@ -1794,6 +1829,16 @@ directory_handle_command(dir_connection_t *conn)
 
   tor_assert(conn);
   tor_assert(conn->base_.type == CONN_TYPE_DIR);
+
+  /* Already marked: nothing to do, and the caller must not mark it again. */
+  if (TO_CONN(conn)->marked_for_close) {
+    return 0;
+  }
+  /* Don't parse queued requests whose stream or circuit is gone.
+   * The caller will close the directory connection without a response. */
+  if (dir_conn_is_closing(conn)) {
+    return -1;
+  }
 
   switch (connection_fetch_from_buf_http(TO_CONN(conn),
                               &headers, MAX_HEADERS_SIZE,
