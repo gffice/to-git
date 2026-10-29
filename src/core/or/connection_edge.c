@@ -4597,13 +4597,7 @@ connection_exit_connect(edge_connection_t *edge_conn)
    *
    * The TORPROTOCOL reason is used instead of EXITPOLICY so client do NOT
    * attempt to retry connecting onto another circuit that will also fail
-   * bringing considerable more load on the network if so.
-   *
-   * Since the address+port set here is a bloomfilter, in very rare cases, the
-   * check will create a false positive meaning that the destination could
-   * actually be legit and thus being denied exit. However, sending back a
-   * reason that makes the client retry results in much worst consequences in
-   * case of an attack so this is a small price to pay. */
+   * bringing considerable more load on the network if so. */
   if (!connection_edge_is_rendezvous_stream(edge_conn) &&
       !network_reentry_is_allowed() &&
       nodelist_reentry_contains(&conn->addr, conn->port)) {
