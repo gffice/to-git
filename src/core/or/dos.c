@@ -146,8 +146,8 @@ get_param_dos_num_circ_max_outq(const networkstatus_t *ns)
                                  DOS_NUM_CIRC_MAX_OUTQ_MAX);
 }
 
-/* Return true iff the circuit creation mitigation is enabled. We look at the
- * consensus for this else a default value is returned. */
+/* Return true iff the circuit creation mitigation is enabled. We look at
+ * our local config, else the consensus, else use a default value. */
 MOCK_IMPL(STATIC unsigned int,
 get_param_cc_enabled, (const networkstatus_t *ns))
 {
@@ -1106,8 +1106,8 @@ dos_geoip_entry_about_to_free(const clientmap_entry_t *geoip_ent)
   SMARTLIST_FOREACH_BEGIN(get_connection_array(), connection_t *, conn) {
     if (conn->type == CONN_TYPE_OR) {
       or_connection_t *or_conn = TO_OR_CONN(conn);
-      if (!tor_addr_compare(&geoip_ent->addr, &TO_CONN(or_conn)->addr,
-                            CMP_EXACT)) {
+      if (geoip_client_entry_matches_addr(geoip_ent,
+                                          &TO_CONN(or_conn)->addr)) {
         or_conn->tracked_for_dos_mitigation = 0;
       }
     }
